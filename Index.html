@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insta-Fast Reel Downloader</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 450px; text-align: center; }
+        h1 { color: #e1306c; margin-bottom: 20px; font-size: 24px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: #e1306c; }
+        button { width: 100%; padding: 12px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        #loader { display: none; margin-top: 15px; color: #555; }
+        #result { margin-top: 20px; }
+        video { width: 100%; border-radius: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Reel Downloader</h1>
+        <p>Paste Instagram Reel Link</p>
+        <input type="text" id="reelUrl" placeholder="https://www.instagram.com/reel/...">
+        <button onclick="downloadVideo()">Download Now</button>
+        
+        <div id="loader">Processing... Please wait ⏳</div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function downloadVideo() {
+            const url = document.getElementById('reelUrl').value;
+            const resDiv = document.getElementById('result');
+            const loader = document.getElementById('loader');
+
+            if(!url) { alert("Please paste a link!"); return; }
+
+            loader.style.display = "block";
+            resDiv.innerHTML = "";
+
+            try {
+                // Backend API call (Aapko apna server URL yahan dalna hoga)
+                const response = await fetch('/get_video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `url=${encodeURIComponent(url)}`
+                });
+                const data = await response.json();
+
+                if (data.video_url) {
+                    resDiv.innerHTML = `
+                        <video controls><source src="${data.video_url}" type="video/mp4"></video>
+                        <br><br>
+                        <a href="${data.video_url}" target="_blank" download="reel.mp4" style="text-decoration:none;">
+                            <button style="background:#28a745;">Save to Device</button>
+                        </a>`;
+                } else {
+                    resDiv.innerHTML = "<p style='color:red;'>Error: " + data.error + "</p>";
+                }
+            } catch (err) {
+                resDiv.innerHTML = "<p style='color:red;'>Server error!</p>";
+            } finally {
+                loader.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
